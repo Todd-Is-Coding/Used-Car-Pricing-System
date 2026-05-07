@@ -11,13 +11,14 @@ import { plainToClass } from 'class-transformer';
 import { UserDTO } from '../users/dtos/user.dto';
 
 export class SerializeInterceptor implements NestInterceptor {
+    constructor(private dto : any){}
   intercept(
     context: ExecutionContext,
     next: CallHandler<any>,
   ): Observable<any> | Promise<Observable<any>> {
     return next.handle().pipe(
       map((data: any) => {
-        return plainToClass(UserDTO, data, {
+        return plainToClass(this.dto, data, {
           excludeExtraneousValues: true,
         });
       }),
