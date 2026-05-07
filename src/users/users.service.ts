@@ -21,7 +21,6 @@ export class UsersService {
 
   find(email: string) {
     const user = this.repo.findBy({ email });
-
     return user;
   }
 

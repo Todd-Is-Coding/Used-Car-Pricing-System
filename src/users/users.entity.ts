@@ -6,6 +6,7 @@ import {
   Column,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { Exclude } from 'class-transformer';
 
 @Entity()
 export class User {
@@ -16,6 +17,7 @@ export class User {
   email!: string;
 
   @Column()
+  @Exclude()
   password!: string;
 
   @AfterInsert()
@@ -32,5 +34,4 @@ export class User {
   logRemove() {
     console.log(`a user is deleted with id ${this.id}`);
   }
-  
 }

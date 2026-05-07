@@ -8,6 +8,8 @@ import {
   Patch,
   Delete,
   NotFoundException,
+  UseInterceptors,
+  ClassSerializerInterceptor,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dtos/craete-user.dto';
@@ -22,6 +24,7 @@ export class UsersController {
     return this.usersService.create(user.email, user.password);
   }
 
+  @UseInterceptors(ClassSerializerInterceptor)
   @Get('/:id')
   async findUserById(@Param('id') id: string) {
     const user = await this.usersService.findOne(parseInt(id));
