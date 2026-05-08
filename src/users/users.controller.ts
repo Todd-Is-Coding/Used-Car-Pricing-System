@@ -8,6 +8,7 @@ import {
   Patch,
   Delete,
   NotFoundException,
+  Session
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { AuthService } from './auth.service';
@@ -21,14 +22,32 @@ import { UserDTO } from './dtos/user.dto';
 export class UsersController {
   constructor(private readonly usersService: UsersService , private readonly authService: AuthService) {}
 
+  @Get('/whoami')
+  whoami(@Session() session : any){
+    return this.usersService.findOne(session.userId);
+  }
   @Post('/signup')
-  createUser(@Body() user: CreateUserDto) {
-    return this.authService.signUp(user.email, user.password);
+  async createUser(@Body() body: CreateUserDto , @Session() session : any) {
+    const  user = await this.authService.signUp(body.email, body.password);
+    session.userId = user.id;
+    return user ;
   }
 
   @Post('/signin')
-  signIn(@Body() user : CreateUserDto) {
-    return this.authService.signIn(user.email , user.password)
+  async signIn(@Body() body : CreateUserDto , @Session() session : any) {
+    const user = await this.authService.signIn(body.email , body.password)
+    session.userId = user.id;
+    return user ;
+  }
+
+  @Get('/colors/:color')
+  setColor(@Param('color') color: string , @Session() session: any) {
+    session.color = color;
+  }
+
+  @Get('/colors')
+  getColor(@Session() session: any) {
+    return session.color;
   }
 
   @Get('/:id')
