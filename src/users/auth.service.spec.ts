@@ -5,8 +5,10 @@ import { UsersService } from './users.service';
 import { User } from './users.entity';
 
 describe('AuthService', () => {
-  it('can create an instance of auth service', async () => {
-    const fakeUserService : Partial<UsersService> = {
+  let service: AuthService;
+
+  beforeEach(async () => {
+    const fakeUserService: Partial<UsersService> = {
       find: () => Promise.resolve([]),
       create: (password: string, email: string) =>
         Promise.resolve({ id: 1, email, password } as User),
@@ -22,8 +24,10 @@ describe('AuthService', () => {
       ],
     }).compile();
 
-    const service = module.get(AuthService);
+    service = module.get(AuthService);
+  });
 
+  it('can create instance of auth service', () => {
     expect(service).toBeDefined();
   });
 });
