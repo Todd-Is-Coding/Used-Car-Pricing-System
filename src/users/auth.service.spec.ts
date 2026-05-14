@@ -1,5 +1,5 @@
 import { Test } from '@nestjs/testing';
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 
 import { AuthService } from './auth.service';
 import { UsersService } from './users.service';
@@ -10,10 +10,23 @@ describe('AuthService', () => {
   let fakeUserService: Partial<UsersService>;
 
   beforeEach(async () => {
+    const users: User[] = [];
     fakeUserService = {
-      find: () => Promise.resolve([]),
-      create: (password: string, email: string) =>
-        Promise.resolve({ id: 1, email, password } as User),
+      find: (email: string) => {
+        const filteredUsers = users.filter((user) => user.email === email);
+        return Promise.resolve(filteredUsers);
+      },
+      create: (email: string, password: string) => {
+        const user = {
+          id: Math.floor(Math.random() * 99999),
+          email,
+          password,
+        } as User;
+
+        users.push(user);
+
+        return Promise.resolve(user);
+      },
     };
 
     const module = await Test.createTestingModule({
@@ -49,5 +62,29 @@ describe('AuthService', () => {
     await expect(service.signUp('asdf@asdf.com', 'asdf')).rejects.toThrow(
       BadRequestException,
     );
+  });
+
+  it('throws if signin is called with an unused email', async () => {
+    await expect(
+      service.signIn('asdflkj@asdlfkj.com', 'passdflkj'),
+    ).rejects.toThrow(NotFoundException);
+  });
+
+  it('throws if an invalid password is provided', async () => {
+    fakeUserService.find = () =>
+      Promise.resolve([
+        { email: 'asdf@asdf.com', password: 'laskdjf' } as User,
+      ]);
+    await expect(
+      service.signIn('laskdjf@alskdfj.com', 'passowrd'),
+    ).rejects.toThrow(BadRequestException);
+  });
+
+  it('returns user if the correct password is provided', async () => {
+    await service.signUp('ahmed@gmail.com', 'password');
+
+    const user = await service.signIn('ahmed@gmail.com', 'password');
+
+    expect(user).toBeDefined();
   });
 });
