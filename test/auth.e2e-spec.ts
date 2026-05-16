@@ -33,4 +33,22 @@ describe('Authentication system (e2e)', () => {
   afterEach(async () => {
     await app.close();
   });
+
+  it('signup as a new user then get the currently logged in user', async () => {
+    const email = 'test@test.com';
+
+    const res = await request(app.getHttpServer())
+      .post('/auth/signup')
+      .send({ email, password: 'test' })
+      .expect(201);
+
+    const cookie = res.get('Set-Cookie');
+
+    const { body } = await request(app.getHttpServer())
+      .get('/auth/whoami')
+      .set('Cookie', cookie as string[])
+      .expect(200);
+
+    expect(body.email).toBe(email);
+  });
 });
