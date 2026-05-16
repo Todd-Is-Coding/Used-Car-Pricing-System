@@ -8,7 +8,9 @@ export class ReportsController {
 
   @Post()
   @UseGuards(AuthGuard)
-  createReport(@Body() body : CreateReportDTO){
+  createReport(@Body() body: CreateReportDTO) {
+    const user = this.reportsService.create(body);
 
+    return user;
   }
 }
